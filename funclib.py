@@ -5,12 +5,12 @@ from sklearn.neighbors import LocalOutlierFactor
 
 
 def airflowMethod(arr:np.array, mini:float, maxi:float):
-	""" Parametrs: 
-			arr : 1D float ndarray, y axis; 
+	""" Parametrs:
+			arr : 1D float ndarray, y axis;
 			mini and maxi: min and max allowed value;
 
 		Function block:
-			time : x axis; 
+			time : x axis;
 
 			trutly : data point bool mask;
 			x1, y1 :  axes for data point
@@ -24,7 +24,7 @@ def airflowMethod(arr:np.array, mini:float, maxi:float):
 	"""
 
 	time = np.arange(len(arr))
-	
+
 	truly = (arr > mini) == (arr < maxi)
 	x1 = time[truly]
 	y1 = arr[truly]
@@ -39,7 +39,7 @@ def airflowMethod(arr:np.array, mini:float, maxi:float):
 	ax.plot(x2, y2, 'r.', markersize=1, label="outlier scores")
 	ax.set_xlabel("time")
 	ax.set_ylabel("sensor readings")
-	ax.set_title("airflow method", fontsize=10) 
+	ax.set_title("airflow method", fontsize=10)
 	legend = ax.legend(loc='upper left')
 	legend.legendHandles[0]._sizes = [5]
 	legend.legendHandles[1]._sizes = [10]
@@ -48,22 +48,22 @@ def airflowMethod(arr:np.array, mini:float, maxi:float):
 
 
 def find_repeat(arr:np.array, flag=False):
-	""" Parametrs: 
-			arr : 1D float ndarray, y axis; 
+	""" Parametrs:
+			arr : 1D float ndarray, y axis;
 			flag : if False, looking for the longest anomaly,
 					if True,  looking for the last anomaly;
 
 		Function block:
 			cPoint : required length to recognize anomalous subarray;
-			time : x axis; 
+			time : x axis;
 			tmp : temporary array for masks;
-			indices : array of indices for each first element from 
+			indices : array of indices for each first element from
 					  the new series;
-			elements : an array storing the number of elements in 
+			elements : an array storing the number of elements in
 					   the required subarrays (series);
 			index : subarray start index for indices, elements;
 			left : the starting index of the anomaly in the input array;
-			right : the last anomaly index in the input array; 
+			right : the last anomaly index in the input array;
 			mask : anomalies scores bool mask;
 			x1, y1 :  axes for anomalies scores
 
@@ -88,7 +88,7 @@ def find_repeat(arr:np.array, flag=False):
 	ax.set_title("Finding Frozen Signals", fontsize=10)
 
 	try:
-		index = np.where(elements > cPoint) 
+		index = np.where(elements > cPoint)
 		index = index[0] # transferring in ndarray from tuple
 		index = np.max(index) if flag == False else index[-1]
 		left = indices[index]
@@ -122,14 +122,14 @@ def find_repeat(arr:np.array, flag=False):
 
 
 def locOutFac(arr:np.array):
-	""" Parametrs: 
-			arr : 1D float ndarray, y axis; 
+	""" Parametrs:
+			arr : 1D float ndarray, y axis;
 
 		Function block:
-			time : x axis; 
+			time : x axis;
 			matrix : prepared structured data for predict;
 
-			outlier_detection : LocalOutlierFactor class object, 
+			outlier_detection : LocalOutlierFactor class object,
 								needed to predict anomalies;
 			pred : predictive array, where -1 is the outlier;
 
@@ -167,7 +167,7 @@ def locOutFac(arr:np.array):
 	ax.plot(x2, y2, 'r.', markersize=1, label="outlier scores")
 	ax.set_xlabel("time")
 	ax.set_ylabel("sensor readings")
-	ax.set_title("Local outlier factor", fontsize=10) 
+	ax.set_title("Local outlier factor", fontsize=10)
 	legend = ax.legend(loc='upper left')
 	legend.legendHandles[0]._sizes = [5]
 	legend.legendHandles[1]._sizes = [10]
@@ -177,17 +177,17 @@ def locOutFac(arr:np.array):
 
 
 def locOutFac2(arr:np.array):
-	""" Parametrs: 
-			arr : 1D float ndarray, y axis; 
+	""" Parametrs:
+			arr : 1D float ndarray, y axis;
 
 		Function block:
-			time : x axis; 
+			time : x axis;
 			matrix : prepared structured data for predict;
 
-			outlier_detection : LocalOutlierFactor class object, 
+			outlier_detection : LocalOutlierFactor class object,
 								needed to predict anomalies;
 			pred : predictive array, where -1 is the outlier;
-			arr_scores : It is the average of the ratio of the local reachability 
+			arr_scores : It is the average of the ratio of the local reachability
 						density of a sample and those of its k-nearest neighbors.
 			radius : an array of local density values ​​for each data point;
 
@@ -211,7 +211,7 @@ def locOutFac2(arr:np.array):
 	pred = outlier_detection.fit_predict(matrix)
 	print(pred)
 	arr_scores = outlier_detection.negative_outlier_factor_
-	radius = (arr_scores.max() - arr_scores) / (arr_scores.max() 
+	radius = (arr_scores.max() - arr_scores) / (arr_scores.max()
 												- arr_scores.min())
 
 	falsely = (pred == -1)
