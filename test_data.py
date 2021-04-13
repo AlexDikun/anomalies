@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from funclib import find_repeat, locOutFac
 
-#data = pd.read_csv('Report_3_5_2020__3_18_2020.csv')
+data = pd.read_csv('Report_3_5_2020__3_18_2020.csv')
 #data = pd.read_csv('Report_3_19_2020__3_22_2020.csv')
-data = pd.read_csv('Report_3_25_2020__3_26_2020.csv')
+#data = pd.read_csv('Report_3_25_2020__3_26_2020.csv')
 
 
 # 0 - 6
@@ -77,4 +77,4 @@ valvePosition = np.array([
 # specially for endless iteration
 all = np.concatenate([do, airflow, valvePosition])
 
-find_repeat(all[-15])
+find_repeat(valvePosition[8])
