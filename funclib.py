@@ -130,7 +130,7 @@ def find_repeat(arr:np.array, flag=False):
 	plt.show()
 
 	try:
-		if mask:
+		if mask.sum():
 			flag = True
 	except:
 		flag = False
