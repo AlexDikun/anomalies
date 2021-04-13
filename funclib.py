@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -21,7 +23,9 @@ def airflowMethod(arr:np.array, mini:float, maxi:float):
 			x2, y2 :  axes for outlier scores
 
 			...
-			return None
+			flag: boolean constant. If True - anomalies found,
+									if False - anomalies not found;
+			return bool(flag)
 
 	"""
 
@@ -46,7 +50,9 @@ def airflowMethod(arr:np.array, mini:float, maxi:float):
 	legend.legendHandles[0]._sizes = [5]
 	legend.legendHandles[1]._sizes = [10]
 	plt.show()
-	return None
+
+	flag = True if falsely.sum() != 0 else False
+	return flag
 
 
 def find_repeat(arr:np.array, flag=False):
@@ -70,7 +76,9 @@ def find_repeat(arr:np.array, flag=False):
 			x1, y1 :  axes for anomalies scores
 
 			...
-			return None
+			flag: boolean constant. If True - anomalies found,
+									if False - anomalies not found;
+			return bool(flag)
 
 	"""
 	size = len(arr)
@@ -120,7 +128,14 @@ def find_repeat(arr:np.array, flag=False):
 		legend.legendHandles[0]._sizes = [5]
 
 	plt.show()
-	return None
+
+	try:
+		if mask:
+			flag = True
+	except:
+		flag = False
+	finally:
+		return flag
 
 
 def locOutFac(arr:np.array):
@@ -144,7 +159,9 @@ def locOutFac(arr:np.array):
 			...
 			draws a graph without classifier
 			...
-			return None
+			flag: boolean constant. If True - anomalies found,
+									if False - anomalies not found;
+			return bool(flag)
 
 	"""
 	time = np.arange(len(arr))
@@ -175,7 +192,9 @@ def locOutFac(arr:np.array):
 	legend.legendHandles[1]._sizes = [10]
 	print("Outlier detected: ", falsely.sum())
 	plt.show()
-	return None
+
+	flag = True if falsely.sum() != 0 else False
+	return flag
 
 
 def locOutFac2(arr:np.array):
@@ -202,7 +221,9 @@ def locOutFac2(arr:np.array):
 			...
 			draws a graph with a classified circle
 			...
-			return None
+			flag: boolean constant. If True - anomalies found,
+									if False - anomalies not found;
+			return bool(flag)
 
 	"""
 	time = np.arange(len(arr))
@@ -235,7 +256,9 @@ def locOutFac2(arr:np.array):
 	legend.legendHandles[0]._sizes = [5]
 	legend.legendHandles[1]._sizes = [10]
 	plt.show()
-	return None
+
+	flag = True if falsely.sum() != 0 else False
+	return flag
 
 
 if __name__ == '__main__':
