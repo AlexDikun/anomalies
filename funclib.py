@@ -83,7 +83,7 @@ def find_repeat(arr:np.array, freezing=None, flag=False):
 			return bool(flag)
 
 	"""
-	size = arr.size()
+	size = arr.size
 
 	if freezing == None:
 		freezing = size // 10
