@@ -55,14 +55,16 @@ def airflowMethod(arr:np.array, mini:float, maxi:float):
 	return flag
 
 
-def find_repeat(arr:np.array, flag=False):
+def find_repeat(arr:np.array, freezing=None, flag=False):
 	""" Parametrs:
 			arr : 1D float ndarray, y axis;
+			freezing : int or None,
+					   required length to recognize anomalous subarray;
+					   if None, then -> 1/10 of arr.size;
 			flag : if False, looking for the longest anomaly,
 					if True,  looking for the last anomaly;
 
 		Function block:
-			cPoint : required length to recognize anomalous subarray;
 			time : x axis;
 			tmp : temporary array for masks;
 			indices : array of indices for each first element from
@@ -81,9 +83,11 @@ def find_repeat(arr:np.array, flag=False):
 			return bool(flag)
 
 	"""
-	size = len(arr)
-	#cPoint = size // 10
-	cPoint = 500
+	size = arr.size()
+
+	if freezing == None:
+		freezing = size // 10
+
 	time = np.arange(size)
 
 	tmp = np.empty(size, dtype=bool)
@@ -98,7 +102,7 @@ def find_repeat(arr:np.array, flag=False):
 	ax.set_title("Finding Frozen Signals", fontsize=10)
 
 	try:
-		index = np.where(elements > cPoint)
+		index = np.where(elements > freezing)
 		index = index[0] # transferring in ndarray from tuple
 		index = np.max(index) if flag == False else index[-1]
 		left = indices[index]
@@ -120,6 +124,8 @@ def find_repeat(arr:np.array, flag=False):
 		legend.legendHandles[0]._sizes = [5]
 		legend.legendHandles[1]._sizes = [10]
 
+		flag = True
+
 	except ValueError:
 		print("Anomalies detected: 0")
 
@@ -127,15 +133,11 @@ def find_repeat(arr:np.array, flag=False):
 		legend = ax.legend(loc='upper left')
 		legend.legendHandles[0]._sizes = [5]
 
+		flag = False
+
 	plt.show()
 
-	try:
-		if mask.sum():
-			flag = True
-	except:
-		flag = False
-	finally:
-		return flag
+	return flag
 
 
 def locOutFac(arr:np.array):
