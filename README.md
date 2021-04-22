@@ -1,5 +1,5 @@
 #anomalies
-1. Install KEPServerEX (6.0 version)
+1. Install KEPServerEX (6.0 version) on your Windows OS
 2. Install Python 3 and libraries with it: numpy, matplotlib, sklearn, opcua
 3. Run OPC Quick Client
 4. Create a group of three float signals
