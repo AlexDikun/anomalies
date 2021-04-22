@@ -10,258 +10,228 @@ from sklearn.cluster import DBSCAN
 
 
 def airflowMethod(arr:np.array, mini:float, maxi:float):
-	""" Parametrs:
-			arr : 1D float ndarray, y axis;
-			mini and maxi: min and max allowed value;
+    """
 
-		Function block:
-			time : x axis;
 
-			trutly : data point bool mask;
-			x1, y1 :  axes for data point
+    Parameters
+    ----------
+    arr : np.array
+        1D float ndarray.
+    mini : float
+        min allowed value.
+    maxi : float
+        max allowed value.
 
-			falsely : outlier scores bool mask;
-			x2, y2 :  axes for outlier scores
+    Returns
+    -------
+    flag : bool
+        If True - anomalies found.
+		If False - anomalies not found.
 
-			...
-			flag: boolean constant. If True - anomalies found,
-									if False - anomalies not found;
-			return bool(flag)
+    """
+    time = np.arange(len(arr))
 
-	"""
+    truly = (arr > mini) == (arr < maxi)
+    x1 = time[truly]
+    y1 = arr[truly]
+    falsely = np.invert(truly)
+    x2 = time[falsely]
+    y2 = arr[falsely]
 
-	time = np.arange(len(arr))
+    print("Outlier detected: ", falsely.sum())
 
-	truly = (arr > mini) == (arr < maxi)
-	x1 = time[truly]
-	y1 = arr[truly]
-	falsely = np.invert(truly)
-	x2 = time[falsely]
-	y2 = arr[falsely]
+    fig, ax = plt.subplots()
+    ax.plot(x1, y1, 'b.', markersize=1, label="data points")
+    ax.plot(x2, y2, 'r.', markersize=1, label="outlier scores")
+    ax.set_xlabel("time")
+    ax.set_ylabel("sensor readings")
+    ax.set_title("airflow method", fontsize=10)
+    legend = ax.legend(loc='upper left')
+    legend.legendHandles[0]._sizes = [5]
+    legend.legendHandles[1]._sizes = [10]
+    plt.show()
 
-	print("Outlier detected: ", falsely.sum())
-
-	fig, ax = plt.subplots()
-	ax.plot(x1, y1, 'b.', markersize=1, label="data points")
-	ax.plot(x2, y2, 'r.', markersize=1, label="outlier scores")
-	ax.set_xlabel("time")
-	ax.set_ylabel("sensor readings")
-	ax.set_title("airflow method", fontsize=10)
-	legend = ax.legend(loc='upper left')
-	legend.legendHandles[0]._sizes = [5]
-	legend.legendHandles[1]._sizes = [10]
-	plt.show()
-
-	flag = True if falsely.sum() != 0 else False
-	return flag
+    flag = True if falsely.sum() != 0 else False
+    return flag
 
 
 def find_repeat(arr:np.array, freezing=None, flag=False):
-	""" Parametrs:
-			arr : 1D float ndarray, y axis;
-			freezing : int or None,
-					   required length to recognize anomalous subarray;
-					   if None, then -> 1/10 of arr.size;
-			flag : if False, looking for the longest anomaly,
-					if True,  looking for the last anomaly;
+    """
 
-		Function block:
-			time : x axis;
-			tmp : temporary array for masks;
-			indices : array of indices for each first element from
-					  the new series;
-			elements : an array storing the number of elements in
-					   the required subarrays (series);
-			index : subarray start index for indices, elements;
-			left : the starting index of the anomaly in the input array;
-			right : the last anomaly index in the input array;
-			mask : anomalies scores bool mask;
-			x1, y1 :  axes for anomalies scores
 
-			...
-			flag: boolean constant. If True - anomalies found,
-									if False - anomalies not found;
-			return bool(flag)
+    Parameters
+    ----------
+    arr : np.array
+        1D float ndarray.
+    freezing : int
+        Required length to recognize anomalous subarray.
+		If None, then -> 1/10 of arr.size. The default is None.
+    flag : bool
+        If False, looking for the longest anomaly.
+        If True,  looking for the last anomaly. The default is False.
 
-	"""
-	size = arr.size
+    Returns
+    -------
+    flag : bool
+        If True - anomalies found.
+		If False - anomalies not found.
 
-	if freezing == None:
-		freezing = size // 10
+    """
+    size = arr.size
 
-	time = np.arange(size)
+    if freezing == None:
+    	freezing = size // 10
 
-	tmp = np.empty(size, dtype=bool)
-	tmp[0] = True
-	np.not_equal(arr[:-1], arr[1:], out=tmp[1:])
-	indices = np.nonzero(tmp)[0]
-	elements = np.diff(np.append(indices, size))
+    time = np.arange(size)
 
-	fig, ax = plt.subplots()
-	ax.set_xlabel("time")
-	ax.set_ylabel("sensor readings")
-	ax.set_title("Finding Frozen Signals", fontsize=10)
+    tmp = np.empty(size, dtype=bool)
+    tmp[0] = True
+    np.not_equal(arr[:-1], arr[1:], out=tmp[1:])
+    indices = np.nonzero(tmp)[0]
+    elements = np.diff(np.append(indices, size))
 
-	try:
-		index = np.where(elements > freezing)
-		index = index[0] # transferring in ndarray from tuple
-		index = np.max(index) if flag == False else index[-1]
-		left = indices[index]
-		try:
-			right = indices[index + 1]
-		except IndexError:
-			right = len(arr) + 1
-		mask = np.full(size, False)
-		mask[left:right] = True
+    fig, ax = plt.subplots()
+    ax.set_xlabel("time")
+    ax.set_ylabel("sensor readings")
+    ax.set_title("Finding Frozen Signals", fontsize=10)
 
-		x1 = time[mask]
-		y1 = arr[mask]
+    try:
+    	index = np.where(elements > freezing)
+    	index = index[0] # transferring in ndarray from tuple
+    	index = np.max(index) if flag == False else index[-1]
+    	left = indices[index]
+    	try:
+    		right = indices[index + 1]
+    	except IndexError:
+    		right = len(arr) + 1
+    	mask = np.full(size, False)
+    	mask[left:right] = True
 
-		print("Anomalies detected: ", mask.sum())
+    	x1 = time[mask]
+    	y1 = arr[mask]
 
-		ax.plot(time, arr, 'b.', markersize=1, label="data points")
-		ax.plot(x1, y1, 'r.', markersize=1, label="anomalies scores")
-		legend = ax.legend(loc='upper left')
-		legend.legendHandles[0]._sizes = [5]
-		legend.legendHandles[1]._sizes = [10]
+    	print("Anomalies detected: ", mask.sum())
 
-		flag = True
+    	ax.plot(time, arr, 'b.', markersize=1, label="data points")
+    	ax.plot(x1, y1, 'r.', markersize=1, label="anomalies scores")
+    	legend = ax.legend(loc='upper left')
+    	legend.legendHandles[0]._sizes = [5]
+    	legend.legendHandles[1]._sizes = [10]
 
-	except ValueError:
-		print("Anomalies detected: 0")
+    	flag = True
 
-		ax.plot(time, arr, 'b.', markersize=1, label="data points")
-		legend = ax.legend(loc='upper left')
-		legend.legendHandles[0]._sizes = [5]
+    except ValueError:
+    	print("Anomalies detected: 0")
 
-		flag = False
+    	ax.plot(time, arr, 'b.', markersize=1, label="data points")
+    	legend = ax.legend(loc='upper left')
+    	legend.legendHandles[0]._sizes = [5]
 
-	plt.show()
+    	flag = False
 
-	return flag
+    plt.show()
+
+    return flag
 
 
 def locOutFac(arr:np.array):
-	""" Parametrs:
-			arr : 1D float ndarray, y axis;
+    """
 
-		Function block:
-			time : x axis;
-			matrix : prepared structured data for predict;
 
-			outlier_detection : LocalOutlierFactor class object,
-								needed to predict anomalies;
-			pred : predictive array, where -1 is the outlier;
+    Parameters
+    ----------
+    arr : np.array
+        1D float ndarray.
 
-			trutly : data point bool mask;
-			x1, y1 :  axes for data point
+    Returns
+    -------
+    flag : bool
+        If True - anomalies found.
+		If False - anomalies not found.
 
-			falsely : outlier scores bool mask;
-			x2, y2 :  axes for outlier scores
+    """
+    time = np.arange(len(arr))
+    matrix = np.array((time, arr))
+    matrix = matrix.T
 
-			...
-			draws a graph without classifier
-			...
-			flag: boolean constant. If True - anomalies found,
-									if False - anomalies not found;
-			return bool(flag)
+    outlier_detection = LocalOutlierFactor(n_neighbors=20)
+    pred = outlier_detection.fit_predict(matrix)
 
-	"""
-	time = np.arange(len(arr))
-	matrix = np.array((time, arr))
-	matrix = matrix.T
+    truly = pred != -1
+    x1 = time[truly]
+    y1 = arr[truly]
 
-	outlier_detection = LocalOutlierFactor(n_neighbors=20)
-	pred = outlier_detection.fit_predict(matrix)
+    falsely = np.invert(truly)
+    x2 = time[falsely]
+    y2 = arr[falsely]
 
-	truly = pred != -1
-	x1 = time[truly]
-	y1 = arr[truly]
+    print("Outlier detected: ", falsely.sum())
 
-	falsely = np.invert(truly)
-	x2 = time[falsely]
-	y2 = arr[falsely]
+    fig, ax = plt.subplots()
+    ax.plot(x1, y1, 'mD', markersize=1, label="data points")
+    ax.plot(x2, y2, 'r.', markersize=1, label="outlier scores")
+    ax.set_xlabel("time")
+    ax.set_ylabel("sensor readings")
+    ax.set_title("Local outlier factor", fontsize=10)
+    legend = ax.legend(loc='upper left')
+    legend.legendHandles[0]._sizes = [5]
+    legend.legendHandles[1]._sizes = [10]
+    print("Outlier detected: ", falsely.sum())
+    plt.show()
 
-	print("Outlier detected: ", falsely.sum())
-
-	fig, ax = plt.subplots()
-	ax.plot(x1, y1, 'mD', markersize=1, label="data points")
-	ax.plot(x2, y2, 'r.', markersize=1, label="outlier scores")
-	ax.set_xlabel("time")
-	ax.set_ylabel("sensor readings")
-	ax.set_title("Local outlier factor", fontsize=10)
-	legend = ax.legend(loc='upper left')
-	legend.legendHandles[0]._sizes = [5]
-	legend.legendHandles[1]._sizes = [10]
-	print("Outlier detected: ", falsely.sum())
-	plt.show()
-
-	flag = True if falsely.sum() != 0 else False
-	return flag
+    flag = True if falsely.sum() != 0 else False
+    return flag
 
 
 def locOutFac2(arr:np.array):
-	""" Parametrs:
-			arr : 1D float ndarray, y axis;
+    """
 
-		Function block:
-			time : x axis;
-			matrix : prepared structured data for predict;
 
-			outlier_detection : LocalOutlierFactor class object,
-								needed to predict anomalies;
-			pred : predictive array, where -1 is the outlier;
-			arr_scores : It is the average of the ratio of the local reachability
-						density of a sample and those of its k-nearest neighbors.
-			radius : an array of local density values ​​for each data point;
+    Parameters
+    ----------
+    arr : np.array
+        1D float ndarray.
 
-			trutly : data point bool mask;
-			x1, y1 :  axes for data point
+    Returns
+    -------
+    flag : bool
+        If True - anomalies found.
+		If False - anomalies not found.
 
-			falsely : outlier scores bool mask;
-			x2, y2 :  axes for outlier scores
+    """
+    time = np.arange(len(arr))
+    matrix = np.array((time, arr))
+    matrix = matrix.T
 
-			...
-			draws a graph with a classified circle
-			...
-			flag: boolean constant. If True - anomalies found,
-									if False - anomalies not found;
-			return bool(flag)
-
-	"""
-	time = np.arange(len(arr))
-	matrix = np.array((time, arr))
-	matrix = matrix.T
-
-	outlier_detection = LocalOutlierFactor(n_neighbors=20)
-	pred = outlier_detection.fit_predict(matrix)
-	print(pred)
-	arr_scores = outlier_detection.negative_outlier_factor_
-	radius = (arr_scores.max() - arr_scores) / (arr_scores.max()
+    outlier_detection = LocalOutlierFactor(n_neighbors=20)
+    pred = outlier_detection.fit_predict(matrix)
+    print(pred)
+    arr_scores = outlier_detection.negative_outlier_factor_
+    radius = (arr_scores.max() - arr_scores) / (arr_scores.max()
 												- arr_scores.min())
 
-	falsely = (pred == -1)
-	x1 = time[falsely]
-	y1 = arr[falsely]
-	r1 = radius[falsely]
+    falsely = (pred == -1)
+    x1 = time[falsely]
+    y1 = arr[falsely]
+    r1 = radius[falsely]
 
-	print("Outlier detected: ", falsely.sum())
+    print("Outlier detected: ", falsely.sum())
 
-	fig, ax = plt.subplots()
-	ax.scatter(matrix[:, 0], matrix[:, 1], color='k', s=2., label='data points')
-	ax.scatter(x1, y1, s=r1, edgecolors='r',
+    fig, ax = plt.subplots()
+    ax.scatter(matrix[:, 0], matrix[:, 1], color='k', s=2., label='data points')
+    ax.scatter(x1, y1, s=r1, edgecolors='r',
 	            facecolors='none', label='outlier scores')
-	ax.set_title("Local outlier factor with classifier")
-	ax.set_xlabel("time")
-	ax.set_ylabel("sensor readings")
-	ax.axis('tight')
-	legend = plt.legend(loc='upper left')
-	legend.legendHandles[0]._sizes = [5]
-	legend.legendHandles[1]._sizes = [10]
-	plt.show()
+    ax.set_title("Local outlier factor with classifier")
+    ax.set_xlabel("time")
+    ax.set_ylabel("sensor readings")
+    ax.axis('tight')
+    legend = plt.legend(loc='upper left')
+    legend.legendHandles[0]._sizes = [5]
+    legend.legendHandles[1]._sizes = [10]
+    plt.show()
 
-	flag = True if falsely.sum() != 0 else False
-	return flag
+    flag = True if falsely.sum() != 0 else False
+    return flag
 
 
 def extreme_value_analysis(arr:np.array, threshold=3):
@@ -271,8 +241,8 @@ def extreme_value_analysis(arr:np.array, threshold=3):
     Parameters
     ----------
     arr : np.array
-        The investigated real signal.
-    threshold : int, optional
+        1D float ndarray.
+    threshold : int
         This is a threshold, anything above which will be considered
         extreme data. The default is 3.
 
@@ -307,36 +277,58 @@ def extreme_value_analysis(arr:np.array, threshold=3):
     return flag
 
 
-def dbscan_analysis(arr:np.array):
-	time = np.arange(len(arr))
-	matrix = np.array((time, arr))
-	matrix = matrix.T
+def dbscan_analysis(arr:np.array, eps=3, n=3):
+    """
 
-	outlier_detection = DBSCAN(eps=3.3, min_samples=2)
-	pred = outlier_detection.fit_predict(matrix)
 
-	truly = pred != -1
-	x1 = time[truly]
-	y1 = arr[truly]
+    Parameters
+    ----------
+    arr : np.array
+        1D float ndarray.
+    eps : int, float
+        The maximum distance between two samples for one to be considered
+        as in the neighborhood of the other. The default is 3.
+    n : int
+        The number of samples (or total weight) in a neighborhood for a point
+        to be considered as a core point. This includes the point it self.
+        The default is 3.
 
-	falsely = np.invert(truly)
-	x2 = time[falsely]
-	y2 = arr[falsely]
+    Returns
+    -------
+    flag : bool const
+        If True - extreme points found.
+        If False - extreme points not found.
 
-	fig, ax = plt.subplots()
-	ax.plot(x1, y1, 'g.', markersize=1, label="data points")
-	ax.plot(x2, y2, 'k.', markersize=1, label="outlier scores")
-	ax.set_xlabel("time")
-	ax.set_ylabel("sensor readings")
-	ax.set_title("DBSCAN analysis", fontsize=10)
-	legend = ax.legend(loc='upper left')
-	legend.legendHandles[0]._sizes = [5]
-	legend.legendHandles[1]._sizes = [10]
-	print("Outlier detected: ", falsely.sum())
-	plt.show()
+    """
+    time = np.arange(len(arr))
+    matrix = np.array((time, arr))
+    matrix = matrix.T
 
-	flag = True if falsely.sum() != 0 else False
-	return flag
+    outlier_detection = DBSCAN(eps=eps, min_samples=n)
+    pred = outlier_detection.fit_predict(matrix)
+
+    truly = pred != -1
+    x1 = time[truly]
+    y1 = arr[truly]
+
+    falsely = np.invert(truly)
+    x2 = time[falsely]
+    y2 = arr[falsely]
+
+    fig, ax = plt.subplots()
+    ax.plot(x1, y1, 'g.', markersize=1, label="data points")
+    ax.plot(x2, y2, 'k.', markersize=1, label="outlier scores")
+    ax.set_xlabel("time")
+    ax.set_ylabel("sensor readings")
+    ax.set_title("DBSCAN analysis", fontsize=10)
+    legend = ax.legend(loc='upper left')
+    legend.legendHandles[0]._sizes = [5]
+    legend.legendHandles[1]._sizes = [10]
+    print("Outlier detected: ", falsely.sum())
+    plt.show()
+
+    flag = True if falsely.sum() != 0 else False
+    return flag
 
 
 if __name__ == '__main__':
