@@ -12,10 +12,14 @@ from sklearn.cluster import DBSCAN
 class SubHandler(object):
 
     """
-    Client to subscription. It will receive events from server
+    Client to subscription. It will receive events from server.
 
-    tags: list of all processed network nodes;
-    storage: multilist for recording the values of processed nodes;
+    All @staticmethods are designed to find anomalies and outliers in 1D arrays.
+
+    Parameters
+    ----------
+    tags : list
+        List of OPS server nodes to which a subscription is made.
 
     """
 
