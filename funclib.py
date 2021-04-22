@@ -3,9 +3,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-# sns.set()
+sns.set()
 
 from sklearn.neighbors import LocalOutlierFactor
+from sklearn.cluster import DBSCAN
 
 
 def airflowMethod(arr:np.array, mini:float, maxi:float):
@@ -257,6 +258,81 @@ def locOutFac2(arr:np.array):
 	legend = plt.legend(loc='upper left')
 	legend.legendHandles[0]._sizes = [5]
 	legend.legendHandles[1]._sizes = [10]
+	plt.show()
+
+	flag = True if falsely.sum() != 0 else False
+	return flag
+
+
+def extreme_value_analysis(arr:np.array, threshold=3):
+    """
+
+
+    Parameters
+    ----------
+    arr : np.array
+        The investigated real signal.
+    threshold : int, optional
+        This is a threshold, anything above which will be considered
+        extreme data. The default is 3.
+
+    Returns
+    -------
+    flag : bool const
+        If True - extreme points found.
+        If False - extreme points not found.
+
+
+    """
+    from scipy import stats
+
+    z_val = stats.zscore(arr)
+    z_min, z_max = np.min(z_val), np.max(z_val)
+    z_val = np.abs(z_val)
+    res = z_val >= threshold
+
+    flag = True in res
+
+    if flag:
+        print("Extreme points detected!")
+    else:
+        print("Extreme points not found!")
+
+    print("Lowest Z-score: ", z_min)
+    print("Highest Z-score: ", z_max)
+    fig, ax = plt.subplots()
+    ax.boxplot(arr)
+    plt.show()
+
+    return flag
+
+
+def dbscan_analysis(arr:np.array):
+	time = np.arange(len(arr))
+	matrix = np.array((time, arr))
+	matrix = matrix.T
+
+	outlier_detection = DBSCAN(eps=3.3, min_samples=2)
+	pred = outlier_detection.fit_predict(matrix)
+
+	truly = pred != -1
+	x1 = time[truly]
+	y1 = arr[truly]
+
+	falsely = np.invert(truly)
+	x2 = time[falsely]
+	y2 = arr[falsely]
+
+	fig, ax = plt.subplots()
+	ax.plot(x1, y1, 'g.', markersize=1, label="data points")
+	ax.plot(x2, y2, 'k.', markersize=1, label="outlier scores")
+	ax.set_xlabel("time")
+	ax.set_ylabel("sensor readings")
+	ax.set_title("DBSCAN analysis", fontsize=10)
+	legend = ax.legend(loc='upper left')
+	legend.legendHandles[0]._sizes = [5]
+	legend.legendHandles[1]._sizes = [10]
+	print("Outlier detected: ", falsely.sum())
 	plt.show()
 
 	flag = True if falsely.sum() != 0 else False
